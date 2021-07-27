@@ -1,0 +1,33 @@
+gui-properties:
+  name: '&2&lShop'
+  rows: 3
+fill-item:
+  material: AIR
+  name: ''
+  lore: []
+categories:
+  blocks:
+    name: blocks
+    item:
+      slot: 12
+      material: STONE
+      name: '&2&lBlocks'
+      lore:
+        - '&7Click to open.'
+  tools:
+    name: tools
+    item:
+      slot: 13
+      material: IRON_PICKAXE
+      name: '&2&lTools'
+      lore:
+        - '&7Click to open.'
+  resources:
+    name: resources
+    item:
+      slot: 14
+      material: DIAMOND
+      name: '&2&lResources'
+      lore:
+        - '&7Click to open.'
+
