@@ -24,9 +24,7 @@ public class CategoryData {
         }
         final File file = new File(this.plugin.getDataFolder(), "shop.dat");
         if (!file.exists()){
-            // TODO add default shop content
-            //  this.plugin.saveResource("shop.dat", false);
-            return;
+            this.plugin.saveResource("shop.dat", false);
         }
         final YamlConfiguration c = YamlConfiguration.loadConfiguration(file);
         for (Category category : this.plugin.getCategories()) {
