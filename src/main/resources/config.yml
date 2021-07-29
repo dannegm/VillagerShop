@@ -1,19 +1,38 @@
+# Main gui
 gui-properties:
+  # Title
   name: '&2&lShop'
+  # Size
   rows: 3
+
+# An item that fills the blanks in gui
 fill-item:
+  # material / id (id only in older versions)
   material: AIR
+  # name of the item
   name: ''
+  # lore of the item (empty in this case)
   lore: []
+
+# Available categories in the shop
 categories:
+  # example category
   blocks:
+    # category name
     name: blocks
+    # item of category in main gui
     item:
+      # slot in main gui
       slot: 12
+      # material / id (id only in older versions)
       material: STONE
+      # name of the item
       name: '&2&lBlocks'
+      # lore of the item
       lore:
         - '&7Click to open.'
+  # other categories
+  # all same as above
   tools:
     name: tools
     item:

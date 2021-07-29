@@ -54,7 +54,6 @@ public class TradeInventory {
         try {
 
             if (this.version >= 1170){
-                // >= 1.17
                 this.nmsItemStack = Reflection.getClass("net.minecraft.world.item.ItemStack");
                 this.merchantRecipe = Reflection.getClass("net.minecraft.world.item.trading.MerchantRecipe");
                 this.merchantRecipeList = Reflection.getClass("net.minecraft.world.item.trading.MerchantRecipeList");
@@ -77,10 +76,12 @@ public class TradeInventory {
                 this.entityVillager = Reflection.getNmsClass("EntityVillager");
                 this.entityHuman = Reflection.getNmsClass("EntityHuman");
                 this.iChatBaseComponent = Reflection.getNmsClass("IChatBaseComponent");
-                if (this.version >= 1140){
-                    this.entityVillagerAbstract = Reflection.getNmsClass("EntityVillagerAbstract");
+                if (this.version >= 1130){
                     this.craftChatMessage = Reflection.getCBClass("util.CraftChatMessage");
                     this.fromStringOrNull = this.craftChatMessage.getMethod("fromStringOrNull", String.class);
+                }
+                if (this.version >= 1140){
+                    this.entityVillagerAbstract = Reflection.getNmsClass("EntityVillagerAbstract");
                     this.entityTypes = Reflection.getNmsClass("EntityTypes");
                     this.entityTypesVillager = Reflection.getFieldVal(this.entityTypes, "VILLAGER");
                 }
@@ -99,11 +100,9 @@ public class TradeInventory {
             this.evConstructor = this.version >= 1140 ? this.entityVillager.getConstructor(this.entityTypes, this.nmsWorld) : this.entityVillager.getConstructor(this.nmsWorld, int.class);
 
             if (this.version >= 1140){
-                // >= 1.14
                 this.recipeListField = Reflection.getFieldByType(this.entityVillagerAbstract, this.merchantRecipeList);
                 this.openTradeMethod = this.entityVillager.getDeclaredMethod("h", this.entityHuman);
             }else if(this.version >= 180){
-                // >= 1.8
                 this.recipeListField = Reflection.getFieldByType(this.entityVillager, this.merchantRecipeList);
                 final Class<?> iMerchant = Reflection.getNmsClass("IMerchant");
                 this.openTradeMethod = entityHuman.getDeclaredMethod("openTrade", iMerchant);
@@ -117,7 +116,7 @@ public class TradeInventory {
     }
 
 
-    public void open(Player player, Category category) {
+    public void open(Player player, Category category){
         try {
             final Object entityVillager = this.createEntityVillager(player.getWorld());
             this.setCustomName(entityVillager, category.getItem().getName());
@@ -128,7 +127,6 @@ public class TradeInventory {
         }
 
     }
-
 
     private Object convert(final ItemStack itemStack) throws InvocationTargetException, IllegalAccessException {
         if (itemStack == null){
