@@ -1,6 +1,7 @@
 package net.dajman.villagershop.category.list;
 
 import net.dajman.villagershop.category.Category;
+import org.bukkit.ChatColor;
 import org.bukkit.inventory.Inventory;
 
 import javax.annotation.Nullable;
@@ -19,7 +20,7 @@ public class CategoryList extends ArrayList<Category> {
     @Nullable
     public Category get(final String name){
         for (Category category : this) {
-            if (category.getPath().equalsIgnoreCase(name) || category.getName().equalsIgnoreCase(name)){
+            if (category.getPath().equalsIgnoreCase(name) || ChatColor.stripColor(category.getName()).equalsIgnoreCase(name)){
                 return category;
             }
         }

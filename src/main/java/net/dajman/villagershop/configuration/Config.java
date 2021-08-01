@@ -44,7 +44,7 @@ public class Config {
             if (categorySection == null){
                 continue;
             }
-            final String name = Optional.ofNullable(categorySection.getString("name")).orElse("name");
+            final String name = ColorUtil.fixColors(Optional.ofNullable(categorySection.getString("name")).orElse("name"));
             final ConfigurationSection itemSection = categorySection.getConfigurationSection("item");
             if (itemSection == null){
                 continue;

@@ -119,7 +119,7 @@ public class TradeInventory {
     public void open(Player player, Category category){
         try {
             final Object entityVillager = this.createEntityVillager(player.getWorld());
-            this.setCustomName(entityVillager, category.getItem().getName());
+            this.setCustomName(entityVillager, category.getName());
             recipeListField.set(entityVillager, getRecipes(category.getConfigInventory()));
             this.openTrade(this.getHandleCraftPlayer.invoke(this.craftPlayer.cast(player)), entityVillager);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
