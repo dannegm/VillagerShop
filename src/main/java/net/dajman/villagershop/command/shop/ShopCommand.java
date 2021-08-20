@@ -60,6 +60,13 @@ public class ShopCommand extends Command {
             return false;
         }
         final Player player = (Player)sender;
+        if (args.length >= 1){
+            final Category category = this.plugin.getCategories().get(args[0]);
+            if (category != null){
+                this.plugin.getTradeInventoryBuilder().open(player, category);
+                return true;
+            }
+        }
         this.plugin.getMainInventoryBuilder().open(player);
         return true;
     }
