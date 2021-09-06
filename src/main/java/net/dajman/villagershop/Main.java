@@ -9,6 +9,10 @@ import net.dajman.villagershop.inventory.inventories.MainInventory;
 import net.dajman.villagershop.inventory.listeners.InventoryClickListener;
 import net.dajman.villagershop.inventory.listeners.InventoryCloseListener;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin {
