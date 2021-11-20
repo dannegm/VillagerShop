@@ -1,5 +1,6 @@
 package net.dajman.villagershop;
 
+import net.dajman.villagershop.category.Category;
 import net.dajman.villagershop.command.shop.ShopCommand;
 import net.dajman.villagershop.configuration.Config;
 import net.dajman.villagershop.category.list.CategoryList;
@@ -56,7 +57,9 @@ public class Main extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        super.onDisable();
+        for (Category category : this.getCategories()) {
+            this.categoryData.save(category);
+        }
     }
 
 }

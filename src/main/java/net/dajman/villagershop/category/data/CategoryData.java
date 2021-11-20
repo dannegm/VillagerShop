@@ -5,7 +5,6 @@ import net.dajman.villagershop.category.Category;
 import net.dajman.villagershop.util.ItemSerializer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
-
 import java.io.*;
 
 import static java.util.Objects.isNull;
@@ -141,17 +140,33 @@ public class CategoryData {
             return;
         }
 
+        final String data = ItemSerializer.itemsToString(category.getConfigInventory().getContents());
+
         final File categoryFile = new File(categoryFolder, category.getPath() + CATEGORY_DATA_FILE_EXTENSION);
+
+        if (categoryFile.exists()){
+            try{
+                final BufferedReader bufferedReader = new BufferedReader(new FileReader(categoryFile));
+
+                final String dataFromFile = bufferedReader.readLine();
+
+                bufferedReader.close();
+
+                if (data.equals(dataFromFile)){
+                    return;
+                }
+
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
 
         try{
             final BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(categoryFile));
 
-            final String data = ItemSerializer.itemsToString(category.getConfigInventory().getContents());
-
             bufferedWriter.write(data);
-            bufferedWriter.newLine();
-
             bufferedWriter.close();
+
         }catch (IOException e){
             System.out.println("[VillagerShop] Error while saving file " + category.getName());
             e.printStackTrace();
