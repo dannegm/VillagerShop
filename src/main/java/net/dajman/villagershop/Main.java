@@ -14,6 +14,8 @@ import net.dajman.villagershop.util.serializer.itemstack.ItemStackSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import static java.util.Objects.nonNull;
+
 public class Main extends JavaPlugin{
 
     private static final Logger LOGGER = Logger.getLogger(Main.class);
@@ -65,13 +67,13 @@ public class Main extends JavaPlugin{
         LOGGER.info("Loading components...");
 
         this.itemStackSerializer = new ItemStackSerializer();
-
-        this.mainInventory = new MainInventory(this);
-        this.tradeInventory =  new TradeInventory();
         this.categories = new CategoryList();
         this.commandManager = new CommandManager();
         (this.configuration = new Config(this)).load();
         (this.categoryData = new CategoryData(this)).load();
+
+        this.mainInventory = new MainInventory(this);
+        this.tradeInventory =  new TradeInventory();
 
         Bukkit.getPluginManager().registerEvents(new InventoryCloseListener(this), this);
         Bukkit.getPluginManager().registerEvents(new InventoryClickListener(this), this);
@@ -85,8 +87,11 @@ public class Main extends JavaPlugin{
 
         LOGGER.info("disabling...");
 
-        for (Category category : this.getCategories()) {
-            this.categoryData.save(category);
+        if (nonNull(this.getCategories())){
+
+            for (Category category : this.getCategories()) {
+                this.categoryData.save(category);
+            }
         }
 
         LOGGER.info("Plugin disabled.");

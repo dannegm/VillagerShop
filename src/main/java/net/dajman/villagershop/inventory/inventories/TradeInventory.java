@@ -2,6 +2,7 @@ package net.dajman.villagershop.inventory.inventories;
 
 import net.dajman.villagershop.category.Category;
 import net.dajman.villagershop.util.Reflection;
+import net.dajman.villagershop.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public class TradeInventory {
+
+    private static final Logger LOGGER = Logger.getLogger(TradeInventory.class);
 
     private final int version = Reflection.getVersionNumber();
 
@@ -51,6 +54,9 @@ public class TradeInventory {
     private Class<?> nmsItemStack;
 
     public TradeInventory() {
+
+        LOGGER.debug("TradeInventory() Initialization for version: {} ", Integer.toString(this.version));
+
         try {
 
             if (this.version >= 1170){
@@ -67,7 +73,11 @@ public class TradeInventory {
                 this.iChatBaseComponent = Reflection.getClass("net.minecraft.network.chat.IChatBaseComponent");
                 this.craftChatMessage = Reflection.getCBClass("util.CraftChatMessage");
                 this.fromStringOrNull = this.craftChatMessage.getMethod("fromStringOrNull", String.class);
+                this.setTradingPlayer = this.entityVillager.getDeclaredMethod(this.version >= 1180 ? "f" : "setTradingPlayer", this.entityHuman);
+                this.setCustomName = this.entityVillager.getMethod(this.version >= 1180 ? "a": "setCustomName", this.iChatBaseComponent);
             } else {
+                this.setTradingPlayer = this.entityVillager.getDeclaredMethod(this.version >= 190 ? "setTradingPlayer" : "a_", this.entityHuman);
+                this.setCustomName = this.entityVillager.getMethod("setCustomName", this.version >= 1130 ? this.iChatBaseComponent : String.class);
                 this.nmsItemStack = Reflection.getNmsClass("ItemStack");
                 this.merchantRecipe = Reflection.getNmsClass("MerchantRecipe");
                 this.merchantRecipeList = Reflection.getNmsClass("MerchantRecipeList");
@@ -93,10 +103,8 @@ public class TradeInventory {
             this.getHandleCraftPlayer = this.craftPlayer.getMethod("getHandle");
             this.craftWorld = Reflection.getCBClass("CraftWorld");
             this.getHandleCraftWorld = this.craftWorld.getMethod("getHandle");
-            this.setTradingPlayer = this.entityVillager.getDeclaredMethod(this.version >= 190 ? "setTradingPlayer" : "a_", this.entityHuman);
 
 
-            this.setCustomName = this.entityVillager.getMethod("setCustomName", this.version >= 1130 ? this.iChatBaseComponent : String.class);
             this.evConstructor = this.version >= 1140 ? this.entityVillager.getConstructor(this.entityTypes, this.nmsWorld) : this.entityVillager.getConstructor(this.nmsWorld, int.class);
 
             if (this.version >= 1140){

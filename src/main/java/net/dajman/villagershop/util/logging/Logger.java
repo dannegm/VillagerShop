@@ -1,7 +1,6 @@
 package net.dajman.villagershop.util.logging;
 
 import net.dajman.villagershop.Main;
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 
@@ -27,7 +26,7 @@ public class Logger {
     }
 
     public boolean isDebugMode(){
-        return nonNull(plugin) && plugin.getConfiguration().debug;
+        return nonNull(plugin) && nonNull(plugin.getConfiguration()) && plugin.getConfiguration().debug;
     }
 
     public boolean debug(final String message, final String... replacements){

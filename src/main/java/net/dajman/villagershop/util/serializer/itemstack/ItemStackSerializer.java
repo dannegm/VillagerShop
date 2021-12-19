@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import java.io.*;
 import java.util.*;
 
+import static java.util.Objects.isNull;
 import static net.dajman.villagershop.util.logging.Logger.getMessage;
 
 
@@ -33,7 +34,9 @@ public class ItemStackSerializer implements Serializer<ItemStack[], String> {
         final Map[] serializedItems = Arrays.stream(items)
                 .map(itemStack -> {
 
-                    itemStack = Optional.ofNullable(itemStack).orElse(new ItemStack(Material.AIR));
+                    if (isNull(itemStack)){
+                        return Collections.emptyMap();
+                    }
 
                     final Map<String, Object> serializedItem = new HashMap<>(itemStack.serialize());
 
@@ -121,6 +124,10 @@ public class ItemStackSerializer implements Serializer<ItemStack[], String> {
 
             return Optional.of(Arrays.stream(serializedItems).map(serializedItem -> {
 
+                if (serializedItem.isEmpty()){
+                    return new ItemStack(Material.AIR);
+                }
+
                 Optional<ItemMeta> deserializedItemMeta = Optional.empty();
 
                 if (serializedItem.containsKey(ITEM_META_KEY)){
@@ -138,6 +145,9 @@ public class ItemStackSerializer implements Serializer<ItemStack[], String> {
 
                 final ItemStack deserializedItem = ItemStack.deserialize(serializedItem);
                 deserializedItemMeta.ifPresent(deserializedItem::setItemMeta);
+
+                LOGGER.debug("deserialize() deserialized item={} from serialized={}",
+                        deserializedItem.toString(), serializedItem.toString());
 
                 return deserializedItem;
 
