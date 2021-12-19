@@ -2,17 +2,17 @@ package net.dajman.villagershop.category.data;
 
 import net.dajman.villagershop.Main;
 import net.dajman.villagershop.category.Category;
-import net.dajman.villagershop.util.ItemSerializer;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.inventory.ItemStack;
+import net.dajman.villagershop.util.logging.Logger;
 import java.io.*;
+import java.util.Optional;
 
 import static java.util.Objects.isNull;
 
 public class CategoryData {
 
+    private static final Logger LOGGER = Logger.getLogger(CategoryData.class);
+
     private static final String CATEGORY_DATA_FILE_EXTENSION = ".dat";
-    private static final String OLD_DATA_FILE_NAME = "shop" + CATEGORY_DATA_FILE_EXTENSION;
     private static final String CATEGORIES_DATA_FOLDER = "categories";
     private static final String BLOCKS_RESOURCE_PATH = "categories/blocks.dat";
     private static final String RESOURCES_RESOURCE_PATH = "categories/resources.dat";
@@ -24,52 +24,49 @@ public class CategoryData {
         this.plugin = plugin;
     }
 
-    private void deleteFile(final File file){
-        if (!file.delete()){
-            System.out.println("[VillagerShop] Error while deleting file " + file.getName());
-        }
-    }
-
     public void load(){
+
+        LOGGER.info("load() Loading data of categories");
 
         final File dataFolder = this.plugin.getDataFolder();
         if (!dataFolder.exists()){
+
+            LOGGER.info("load() Data folder of this plugin doesn't exist. Loaded 0 categories");
             return;
         }
 
-        final File oldDataFile = new File(dataFolder, OLD_DATA_FILE_NAME);
         final File categoryFolder = new File(dataFolder, CATEGORIES_DATA_FOLDER);
-
-        if (oldDataFile.exists()){
-
-            if (!categoryFolder.exists()){
-
-                this.loadOldDataFile();
-                this.plugin.getCategories().forEach(this::save);
-
-                this.deleteFile(oldDataFile);
-                return;
-            }
-
-            this.deleteFile(oldDataFile);
-        }
 
         if (!categoryFolder.exists()){
 
+            LOGGER.debug("load() category folder does not exist.");
+
             if (!categoryFolder.mkdir()){
-                System.out.println("[VillagerShop] Error while creating categories data folder.");
+
+                LOGGER.error("load() Error while creating categories data folder.");
                 return;
             }
+
+            LOGGER.debug("load() Saving resource files...");
 
             this.plugin.saveResource(BLOCKS_RESOURCE_PATH, false);
             this.plugin.saveResource(RESOURCES_RESOURCE_PATH, false);
             this.plugin.saveResource(TOOLS_RESOURCE_PATH, false);
+
+            LOGGER.debug("load() Resources saved.");
         }
 
+        LOGGER.debug("load() Loading categories...");
+
         for (Category category : this.plugin.getCategories()) {
+
+            LOGGER.debug("load() Loading category={}", category.getName());
+
             final File categoryFile = new File(categoryFolder, category.getPath() + CATEGORY_DATA_FILE_EXTENSION);
 
             if (!categoryFile.exists()){
+
+                LOGGER.warn("load() Data file for category={} not found", category.getName());
                 continue;
             }
 
@@ -81,95 +78,108 @@ public class CategoryData {
                 bufferedReader.close();
 
                 if (isNull(data)){
-                    System.out.println("[VillagerShop] Error while reading file " + category.getPath()  + CATEGORY_DATA_FILE_EXTENSION);
+
+                    LOGGER.error("load() Error while reading file={} for category={}, data is null",
+                            category.getPath() + CATEGORY_DATA_FILE_EXTENSION, category.getName());
                     continue;
                 }
 
-                final ItemStack[] contents = ItemSerializer.stringToItems(data);
-                category.getConfigInventory().setContents(contents);
+                try{
+                    this.plugin.getItemStackSerializer().deserialize(data).ifPresent(
+                            items -> category.getConfigInventory().setContents(items));
+
+                    LOGGER.debug("load() Data of category={} loaded.", category.getName());
+
+                }catch (Exception e){
+                    LOGGER.error("Error while deserializing items from file {}. {}",
+                            category.getName(), Logger.getMessage(e));
+                }
 
             }catch (IOException e){
-                e.printStackTrace();
-                System.out.println("[VillagerShop] Error while reading file " + category.getPath()  + CATEGORY_DATA_FILE_EXTENSION);
+                LOGGER.error("load() Error while reading file={} for category={}. {}",
+                        category.getPath() + CATEGORY_DATA_FILE_EXTENSION,
+                        category.getName(), Logger.getMessage(e));
             }
 
         }
 
-    }
-
-    @Deprecated
-    public void loadOldDataFile(){
-        final File dataFolder = this.plugin.getDataFolder();
-        if (!dataFolder.exists()){
-            return;
-        }
-
-        final File file = new File(this.plugin.getDataFolder(), OLD_DATA_FILE_NAME);
-        if (!file.exists()){
-            return;
-        }
-
-        final YamlConfiguration c = YamlConfiguration.loadConfiguration(file);
-
-        for (Category category : this.plugin.getCategories()) {
-
-            final String data = c.getString(category.getPath());
-
-            if (data == null){
-                continue;
-            }
-
-            final ItemStack[] contents = ItemSerializer.stringToItems(data);
-            category.getConfigInventory().setContents(contents);
-
-        }
     }
 
     public void save(final Category category){
 
+        LOGGER.debug("save() Saving category={}...", category.getName());
+
         final File dataFolder = this.plugin.getDataFolder();
+
         if (!dataFolder.exists() && !dataFolder.mkdir()){
-            System.out.println("[VillagerShop] Error while creating plugin data folder." );
+
+            LOGGER.error("save() Error while creating plugin data folder.");
             return;
         }
 
         final File categoryFolder = new File(dataFolder, CATEGORIES_DATA_FOLDER);
 
         if (!categoryFolder.exists() && !categoryFolder.mkdir()){
-            System.out.println("[VillagerShop] Error while creating categories data folder." );
+
+            LOGGER.error("save() Error while creating categories data folder.");
             return;
         }
 
-        final String data = ItemSerializer.itemsToString(category.getConfigInventory().getContents());
+        final String data;
+        try{
+            data = this.plugin.getItemStackSerializer().serialize(category.getConfigInventory().getContents())
+                    .orElse("");
+
+        } catch (Exception e) {
+
+            LOGGER.error("Error while serializing items of category={}. {}",
+                    category.getName(), Logger.getMessage(e));
+            return;
+        }
+
+        LOGGER.debug("save() Serialized items={} for category={}", data, category.getName());
 
         final File categoryFile = new File(categoryFolder, category.getPath() + CATEGORY_DATA_FILE_EXTENSION);
 
         if (categoryFile.exists()){
+
+            LOGGER.debug("save() categoryFile={} for category={} already exist, trying to read file",
+                    categoryFile.getName(), category.getName());
+
             try{
                 final BufferedReader bufferedReader = new BufferedReader(new FileReader(categoryFile));
 
                 final String dataFromFile = bufferedReader.readLine();
 
+                LOGGER.debug("save() Read data={} from file={}", Optional.ofNullable(dataFromFile).orElse(""),
+                        categoryFile.getName());
+
                 bufferedReader.close();
 
                 if (data.equals(dataFromFile)){
+
+                    LOGGER.debug("save() oldData is equals to new data, writing is not necessary.",
+                            dataFromFile, data);
                     return;
                 }
 
             }catch (IOException e){
-                e.printStackTrace();
+                LOGGER.error("save() Error while reading file={}. {}", categoryFile.getName(), Logger.getMessage(e));
             }
         }
 
+
+        LOGGER.debug("save() Trying to save data of category={} to file={}", category.getName(), categoryFile.getName());
         try{
             final BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(categoryFile));
 
             bufferedWriter.write(data);
             bufferedWriter.close();
 
+            LOGGER.debug("save() Data of category={} saved.", category.getName());
+
         }catch (IOException e){
-            System.out.println("[VillagerShop] Error while saving file " + category.getName());
-            e.printStackTrace();
+            LOGGER.error("save() Error while saving file={}. {}", categoryFile.getName(), Logger.getMessage(e));
         }
 
     }

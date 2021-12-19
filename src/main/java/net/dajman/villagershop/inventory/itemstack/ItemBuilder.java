@@ -1,8 +1,8 @@
 package net.dajman.villagershop.inventory.itemstack;
 
-import com.sun.istack.internal.NotNull;
-import net.dajman.villagershop.util.ColorUtil;
-import net.dajman.villagershop.util.NumberUtil;
+import net.dajman.villagershop.util.Colors;
+import net.dajman.villagershop.util.Numbers;
+import net.dajman.villagershop.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -11,29 +11,36 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toList;
+
 public class ItemBuilder{
 
+    private static final Logger LOGGER = Logger.getLogger(ItemBuilder.class);
+
     private Material material;
-    private int amount;
-    private short damage;
+    private Integer amount;
+    private Short damage;
+    private Integer customModelData;
     private String name;
     private List<String> lore;
 
-    public ItemBuilder(@NotNull final Material material){
+    public ItemBuilder(final Material material){
         this.material = material;
         this.amount = 1;
         this.damage = 0;
         this.lore = new ArrayList<>();
     }
 
-    public ItemBuilder(@NotNull final Material material, final int amount){
+    public ItemBuilder(final Material material, final int amount){
         this.material = material;
         this.amount = amount;
         this.damage = 0;
         this.lore = new ArrayList<>();
     }
 
-    public ItemBuilder(@NotNull final Material material, final int amount, final short damage){
+    public ItemBuilder(final Material material, final int amount, final short damage){
         this.material = material;
         this.amount = amount;
         this.damage = damage;
@@ -41,7 +48,7 @@ public class ItemBuilder{
     }
 
 
-    public ItemBuilder(@NotNull final String item){
+    public ItemBuilder(final String item){
         this.lore = new ArrayList<>();
         this.material = Material.AIR;
         this.damage = 0;
@@ -49,51 +56,65 @@ public class ItemBuilder{
         String itemName = item;
         if (item.contains(" ")){
             final String[] splited = item.split(" ");
-            if (NumberUtil.isInteger(splited[1])){
-                this.amount = Integer.parseInt(splited[1]);
-            }
+
+            Numbers.parseInt(splited[1]).ifPresent(integer -> this.amount = integer);
             itemName = splited[0];
+
+            if (splited.length > 2 && splited[2].toLowerCase().startsWith("custommodeldata:")){
+                Numbers.parseInt(splited[2].substring(16)).ifPresent(integer -> this.customModelData = integer);
+            }
         }
         if (itemName.contains(":")){
             final String[] splited = itemName.split(":");
+
             itemName = splited[0];
-            if (NumberUtil.isShort(splited[1])) {
-                this.damage = Short.parseShort(splited[1]);
-            }
+
+            Numbers.parseShort(splited[1]).ifPresent(shortVal -> this.damage = shortVal);
         }
-        if (NumberUtil.isInteger(itemName)){
+
+        final Optional<Integer> optionalMaterialInt = Numbers.parseInt(itemName);
+
+        if (optionalMaterialInt.isPresent()){
             try{
                 final Method method = Material.class.getMethod("getMaterial", int.class);
-                this.material = (Material) method.invoke(Material.class, Integer.parseInt(itemName));
+                this.material = (Material) method.invoke(Material.class, optionalMaterialInt.get());
+
                 return;
-            }catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e){
+            }catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                LOGGER.debug("ItemBuilder() Getting material by id failed. {}", Logger.getMessage(e));
             }
         }
-        this.material = getMaterialfromString(itemName);
+
+        this.material = getMaterialFromString(itemName);
     }
 
-    public ItemBuilder setAmount(final int amount){
+    public ItemBuilder setAmount(final Integer amount){
         this.amount = amount;
         return this;
     }
 
-    public ItemBuilder setName(String name) {
-        this.name = name != null ? ColorUtil.fixColors(name) : "";
+    public ItemBuilder setCustomModelData(final Integer customModelData){
+        this.customModelData = customModelData;
         return this;
     }
 
-    public ItemBuilder setLore(List<String> lore) {
-        this.lore = lore != null ? ColorUtil.fixColors(lore) : Collections.emptyList();
+    public ItemBuilder setName(final String name) {
+        this.name = nonNull(name) ? Colors.fixColors(name) : "";
         return this;
     }
 
-    public ItemBuilder setLore(String... lore) {
-        this.lore = ColorUtil.fixColors(Arrays.asList(lore));
+    public ItemBuilder setLore(final List<String> lore) {
+        this.lore = nonNull(lore) ? Colors.fixColors(lore) : Collections.emptyList();
+        return this;
+    }
+
+    public ItemBuilder setLore(final String... lore) {
+        this.lore = nonNull(lore) ? Colors.fixColors(Arrays.asList(lore)) : Collections.emptyList();
         return this;
     }
 
     public ItemBuilder addLore(final String text){
-        this.lore.add(text != null ? ColorUtil.fixColors(text) : "");
+        this.lore.add(text != null ? Colors.fixColors(text) : "");
         return this;
     }
 
@@ -117,56 +138,54 @@ public class ItemBuilder{
         return lore;
     }
 
-    public ItemStack build(){
+    public ItemStack build(final String... replacements){
         final ItemStack itemStack = new ItemStack(this.material, this.amount, this.damage);
         final ItemMeta itemMeta = itemStack.getItemMeta();
-        if (itemMeta == null){
+
+        if (isNull(itemMeta)){
             return itemStack;
         }
-        if (this.name != null){
-            itemMeta.setDisplayName(this.name);
-        }
-        if (this.lore != null && !this.lore.isEmpty()){
-            itemMeta.setLore(this.lore);
-        }
-        itemStack.setItemMeta(itemMeta);
-        return itemStack;
-    }
 
+        if (nonNull(this.name)){
 
-    public ItemStack build(final Map<String, String> replaces){
-        final ItemStack itemStack = new ItemStack(this.material, this.amount, this.damage);
-        final ItemMeta itemMeta = itemStack.getItemMeta();
-        if (itemMeta == null){
-            return itemStack;
-        }
-        if (this.name != null){
             String name = this.name;
-            for(Map.Entry<String, String> entry : replaces.entrySet()){
-                name = name.replace(entry.getKey(), entry.getValue());
+
+            for(int i = 1; i < replacements.length; i += 2){
+                name = name.replace(replacements[i - 1], replacements[i]);
             }
+
             itemMeta.setDisplayName(name);
         }
-        if (this.lore != null && !this.lore.isEmpty()){
-            final List<String> lore = new ArrayList<>();
-            this.lore.forEach(line -> {
-                for(Map.Entry<String, String> entry : replaces.entrySet()){
-                    line = line.replace(entry.getKey(), entry.getValue());
+
+        if (nonNull(this.lore) && !this.lore.isEmpty()){
+
+            itemMeta.setLore(this.lore.stream().map(line -> {
+
+                for(int i = 1; i < replacements.length; i += 2){
+                    line = line.replace(replacements[i - 1], replacements[i]);
                 }
-                lore.add(line);
-            });
-            itemMeta.setLore(lore);
+
+                return line;
+            }).collect(toList()));
         }
+
+        if (nonNull(this.customModelData)){
+
+            try{
+                final Method method = itemMeta.getClass().getMethod("setCustomModelData", Integer.class);
+                method.invoke(itemMeta, this.customModelData);
+
+            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+                LOGGER.debug("Setting custom model data failed. {}", Logger.getMessage(e));
+            }
+        }
+
         itemStack.setItemMeta(itemMeta);
         return itemStack;
     }
 
 
-    private static Material getMaterialfromString(String mat){
-        Material m = Material.getMaterial(mat.toUpperCase());
-        if (m != null){
-            return m;
-        }
-        return Material.AIR;
+    private static Material getMaterialFromString(String mat){
+        return  Optional.ofNullable(Material.getMaterial(mat.toUpperCase())).orElse(Material.AIR);
     }
 }

@@ -1,10 +1,13 @@
 package net.dajman.villagershop.category;
 
+import net.dajman.villagershop.Main;
 import net.dajman.villagershop.inventory.itemstack.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 
 public class Category {
+
+    private static final String CATEGORY_PERMISSION_PREFIX = Main.PERMISSION_PREFIX + "category.";
 
     private String path;
     private String name;
@@ -58,5 +61,9 @@ public class Category {
 
     public void setConfigInventory(Inventory configInventory) {
         this.configInventory = configInventory;
+    }
+
+    public String getPermission(){
+        return CATEGORY_PERMISSION_PREFIX + this.getPath();
     }
 }

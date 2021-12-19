@@ -4,12 +4,12 @@ import net.dajman.villagershop.category.Category;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.Inventory;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class CategoryList extends ArrayList<Category> {
 
-    @Override
+
     public boolean add(Category category) {
         if (this.contains(category)){
             return false;
@@ -17,34 +17,19 @@ public class CategoryList extends ArrayList<Category> {
         return super.add(category);
     }
 
-    @Nullable
-    public Category get(final String name){
-        for (Category category : this) {
-            if (category.getPath().equalsIgnoreCase(name) || ChatColor.stripColor(category.getName()).equalsIgnoreCase(name)){
-                return category;
-            }
-        }
-        return null;
+    public Optional<Category> getByName(final String name){
+        return this.stream().filter(category ->
+                category.getPath().equalsIgnoreCase(name)
+                        || ChatColor.stripColor(category.getName()).equalsIgnoreCase(name))
+                .findFirst();
     }
 
-    @Nullable
-    public Category get(final int slot){
-        for (Category category : this) {
-            if (category.getSlot() == slot){
-                return category;
-            }
-        }
-        return null;
+    public Optional<Category> getBySlot(final int slot){
+        return this.stream().filter(category -> category.getSlot() == slot).findFirst();
     }
 
-    @Nullable
-    public Category get(final Inventory inventory){
-        for (Category category : this) {
-            if (category.getConfigInventory().equals(inventory)){
-                return category;
-            }
-        }
-        return null;
+    public Optional<Category> getByInventory(final Inventory inventory){
+        return this.stream().filter(category -> category.getConfigInventory().equals(inventory)).findFirst();
     }
 
 }

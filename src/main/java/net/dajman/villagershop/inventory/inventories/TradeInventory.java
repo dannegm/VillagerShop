@@ -67,7 +67,7 @@ public class TradeInventory {
                 this.iChatBaseComponent = Reflection.getClass("net.minecraft.network.chat.IChatBaseComponent");
                 this.craftChatMessage = Reflection.getCBClass("util.CraftChatMessage");
                 this.fromStringOrNull = this.craftChatMessage.getMethod("fromStringOrNull", String.class);
-            }else{
+            } else {
                 this.nmsItemStack = Reflection.getNmsClass("ItemStack");
                 this.merchantRecipe = Reflection.getNmsClass("MerchantRecipe");
                 this.merchantRecipeList = Reflection.getNmsClass("MerchantRecipeList");
