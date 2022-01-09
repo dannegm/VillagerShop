@@ -2,7 +2,7 @@ package net.dajman.villagershop.command.manager;
 
 import net.dajman.villagershop.command.Command;
 import net.dajman.villagershop.command.util.CommandList;
-import net.dajman.villagershop.util.logging.Logger;
+import net.dajman.villagershop.common.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.SimpleCommandMap;
@@ -47,7 +47,7 @@ public class CommandManager extends CommandList {
             return true;
 
         } catch (final NoSuchFieldException | IllegalAccessException e){
-            LOGGER.error("register() Error while registering commands. {}", Logger.getMessage(e));
+            LOGGER.error("register() Error while registering commands. {}", e);
 
             if (LOGGER.isDebugMode()){
                 e.printStackTrace();
@@ -105,7 +105,7 @@ public class CommandManager extends CommandList {
 
         } catch (final NoSuchFieldException | IllegalAccessException e){
 
-            LOGGER.error("unregister() Error while unregistering commands. {}", Logger.getMessage(e));
+            LOGGER.error("unregister() Error while unregistering commands. {}", e);
 
             if (LOGGER.isDebugMode()){
                 e.printStackTrace();

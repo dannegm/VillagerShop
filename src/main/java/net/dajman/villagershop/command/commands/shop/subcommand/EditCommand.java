@@ -1,12 +1,12 @@
 package net.dajman.villagershop.command.commands.shop.subcommand;
 
 import net.dajman.villagershop.Main;
-import net.dajman.villagershop.category.Category;
+import net.dajman.villagershop.data.category.Category;
 import net.dajman.villagershop.command.PlayerCommand;
 import net.dajman.villagershop.command.commands.shop.ShopCommand;
 import net.dajman.villagershop.util.Colors;
 import net.dajman.villagershop.util.Messages;
-import net.dajman.villagershop.util.logging.Logger;
+import net.dajman.villagershop.common.logging.Logger;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
@@ -21,10 +21,9 @@ public class EditCommand extends PlayerCommand {
 
     private static final String PERMISSION_COMMAND_SHOP_EDIT = ShopCommand.PERMISSION_COMMAND_SHOP + ".edit";
 
-    private static final List<String> USAGE_MESSAGE = Colors.fixColors(Arrays.asList(
-            "&2Usage:",
-            "&a/[prefix] [label] list &7 - list of categories",
-            "&a/[prefix] [label] [category] &7- edit category"));
+    private static final String USAGE_MESSAGE = Colors.fixColors(
+            "\n&f/[prefix] [label] list &7 - list of categories"
+            + "\n&f/[prefix] [label] [category] &7- edit category");
 
     private static final String LIST_EMPTY_MESSAGE = Colors.fixColors("&cList is empty.");
     private static final String LIST_OF_CATEGORIES_MESSAGE = Colors.fixColors("&aList of categories");
@@ -32,7 +31,7 @@ public class EditCommand extends PlayerCommand {
     private static final String CATEGORY_NOT_FOUND_MESSAGE = Colors.fixColors("&cCategory &7{CATEGORY} &cnot found.");
 
     public EditCommand(Main plugin, String label, String... aliases) {
-        super(plugin, label, PERMISSION_COMMAND_SHOP_EDIT, "/[prefix] [label] [category]", aliases);
+        super(plugin, label, PERMISSION_COMMAND_SHOP_EDIT, USAGE_MESSAGE, aliases);
     }
 
     @Override
@@ -79,7 +78,8 @@ public class EditCommand extends PlayerCommand {
         }
 
         final Category category = optionalCategory.get();
-        player.openInventory(category.getConfigInventory());
+
+        this.plugin.getConfigInventoryService().openConfigInventory(player, category);
 
         LOGGER.debug("onPlayerCommand() Open config inventory for player={} and category={}",
                 player.getName(), category.getName());

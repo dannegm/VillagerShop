@@ -4,7 +4,7 @@ import net.dajman.villagershop.Main;
 import net.dajman.villagershop.command.Command;
 import net.dajman.villagershop.command.commands.shop.ShopCommand;
 import net.dajman.villagershop.util.Messages;
-import net.dajman.villagershop.util.logging.Logger;
+import net.dajman.villagershop.common.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -61,7 +61,7 @@ public class OpenCommand extends Command {
             LOGGER.debug("onCommand() Force opening shop for player={} by sender={}",
                     targetPlayer.getName(), sender.getName());
 
-            this.plugin.getMainInventoryBuilder().open(targetPlayer);
+            this.plugin.getShopInventoryService().openShop(targetPlayer);
 
             return true;
         }
@@ -77,7 +77,7 @@ public class OpenCommand extends Command {
         LOGGER.debug("onCommand() Opening shop for player={} by sender={}", targetPlayer.getName(),
                 sender.getName());
 
-        this.plugin.getMainInventoryBuilder().open(targetPlayer);
+        this.plugin.getShopInventoryService().openShop(targetPlayer);
 
         return true;
     }

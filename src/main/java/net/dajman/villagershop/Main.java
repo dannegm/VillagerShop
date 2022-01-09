@@ -1,16 +1,19 @@
 package net.dajman.villagershop;
 
-import net.dajman.villagershop.category.Category;
+import net.dajman.villagershop.data.category.Category;
 import net.dajman.villagershop.command.manager.CommandManager;
-import net.dajman.villagershop.configuration.Config;
-import net.dajman.villagershop.category.list.CategoryList;
-import net.dajman.villagershop.category.data.CategoryData;
-import net.dajman.villagershop.inventory.inventories.TradeInventory;
-import net.dajman.villagershop.inventory.inventories.MainInventory;
+import net.dajman.villagershop.data.configuration.Config;
+import net.dajman.villagershop.data.category.CategoryList;
+import net.dajman.villagershop.data.service.CategoryDataService;
+import net.dajman.villagershop.inventory.listeners.actionservice.config.ConfigInventoryActionService;
+import net.dajman.villagershop.inventory.listeners.actionservice.shop.ShopInventoryActionService;
+import net.dajman.villagershop.inventory.service.config.ConfigInventoryService;
+import net.dajman.villagershop.inventory.service.shop.ShopInventoryService;
+import net.dajman.villagershop.inventory.service.trade.TradeInventoryService;
 import net.dajman.villagershop.inventory.listeners.InventoryClickListener;
 import net.dajman.villagershop.inventory.listeners.InventoryCloseListener;
-import net.dajman.villagershop.util.logging.Logger;
-import net.dajman.villagershop.util.serializer.itemstack.ItemStackSerializer;
+import net.dajman.villagershop.common.logging.Logger;
+import net.dajman.villagershop.data.serialization.itemstack.ItemStackSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -23,10 +26,11 @@ public class Main extends JavaPlugin{
     public static final String PERMISSION_PREFIX = "villagershop.";
 
     private Config configuration;
-    private CategoryData categoryData;
     private CategoryList categories;
-    private MainInventory mainInventory;
-    private TradeInventory tradeInventory;
+    private CategoryDataService categoryDataService;
+    private ShopInventoryService shopInventoryService;
+    private TradeInventoryService tradeInventoryService;
+    private ConfigInventoryService configInventoryService;
     private CommandManager commandManager;
 
     private ItemStackSerializer itemStackSerializer;
@@ -40,16 +44,20 @@ public class Main extends JavaPlugin{
         return this.categories;
     }
 
-    public MainInventory getMainInventoryBuilder() {
-        return this.mainInventory;
+    public CategoryDataService getCategoryDataService() {
+        return categoryDataService;
     }
 
-    public TradeInventory getTradeInventoryBuilder() {
-        return this.tradeInventory;
+    public ShopInventoryService getShopInventoryService() {
+        return shopInventoryService;
     }
 
-    public CategoryData getCategoryData() {
-        return this.categoryData;
+    public TradeInventoryService getTradeInventoryService() {
+        return this.tradeInventoryService;
+    }
+
+    public ConfigInventoryService getConfigInventoryService() {
+        return configInventoryService;
     }
 
     public CommandManager getCommandManager() {
@@ -70,13 +78,19 @@ public class Main extends JavaPlugin{
         this.categories = new CategoryList();
         this.commandManager = new CommandManager();
         (this.configuration = new Config(this)).load();
-        (this.categoryData = new CategoryData(this)).load();
+        (this.categoryDataService = new CategoryDataService(this)).load();
 
-        this.mainInventory = new MainInventory(this);
-        this.tradeInventory =  new TradeInventory();
+        this.shopInventoryService = new ShopInventoryService(this);
+        this.tradeInventoryService =  new TradeInventoryService();
+        this.configInventoryService = new ConfigInventoryService(this);
 
-        Bukkit.getPluginManager().registerEvents(new InventoryCloseListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new InventoryClickListener(this), this);
+        final ConfigInventoryActionService configInventoryActionService = new ConfigInventoryActionService(this);
+        final ShopInventoryActionService shopInventoryActionService = new ShopInventoryActionService(this);
+
+        Bukkit.getPluginManager().registerEvents(new InventoryCloseListener(
+                this, configInventoryActionService), this);
+        Bukkit.getPluginManager().registerEvents(new InventoryClickListener(
+                this, shopInventoryActionService, configInventoryActionService), this);
 
 
         LOGGER.info("Plugin enabled.");
@@ -87,10 +101,10 @@ public class Main extends JavaPlugin{
 
         LOGGER.info("disabling...");
 
-        if (nonNull(this.getCategories())){
+        if (nonNull(this.categories)){
 
-            for (Category category : this.getCategories()) {
-                this.categoryData.save(category);
+            for (Category category : this.categories) {
+                this.categoryDataService.save(category);
             }
         }
 

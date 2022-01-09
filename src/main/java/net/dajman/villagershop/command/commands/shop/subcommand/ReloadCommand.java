@@ -5,7 +5,7 @@ import net.dajman.villagershop.command.Command;
 import net.dajman.villagershop.command.commands.shop.ShopCommand;
 import net.dajman.villagershop.util.Colors;
 import net.dajman.villagershop.util.Messages;
-import net.dajman.villagershop.util.logging.Logger;
+import net.dajman.villagershop.common.logging.Logger;
 import org.bukkit.command.CommandSender;
 
 import java.util.Arrays;
@@ -27,9 +27,8 @@ public class ReloadCommand extends Command {
         LOGGER.debug("onCommand() Received command from sender={}, prefix={}, label={} and args={}",
                 sender.getName(), prefix, label, Arrays.toString(args));
 
-        this.plugin.reloadConfig();
         this.plugin.getConfiguration().load();
-        this.plugin.getCategoryData().load();
+        this.plugin.getCategoryDataService().load();
 
         LOGGER.debug("onCommand() Configuration reloaded by sender={}", sender.getName());
 

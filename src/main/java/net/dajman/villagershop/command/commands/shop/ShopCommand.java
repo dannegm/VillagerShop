@@ -1,11 +1,11 @@
 package net.dajman.villagershop.command.commands.shop;
 
 import net.dajman.villagershop.Main;
-import net.dajman.villagershop.category.Category;
+import net.dajman.villagershop.data.category.Category;
 import net.dajman.villagershop.command.Command;
 import net.dajman.villagershop.command.PlayerCommand;
 import net.dajman.villagershop.util.Messages;
-import net.dajman.villagershop.util.logging.Logger;
+import net.dajman.villagershop.common.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -70,7 +70,7 @@ public class ShopCommand extends Command {
             }
 
             LOGGER.debug("onCommand() Opening category={} for player={}", category.getName(), player.getName());
-            this.plugin.getTradeInventoryBuilder().open(player, category);
+            this.plugin.getTradeInventoryService().open(player, category);
             return true;
         }
 
@@ -113,7 +113,7 @@ public class ShopCommand extends Command {
                 }
 
                 LOGGER.debug("onCommand() Force opening category={} for player={}", category.getName(), targetPlayer.getName());
-                this.plugin.getTradeInventoryBuilder().open(targetPlayer, category);
+                this.plugin.getTradeInventoryService().open(targetPlayer, category);
 
                 return true;
             }
@@ -127,7 +127,7 @@ public class ShopCommand extends Command {
             }
 
             LOGGER.debug("onCommand() Opening category={} for player={}", category.getName(), targetPlayer.getName());
-            this.plugin.getTradeInventoryBuilder().open(targetPlayer, category);
+            this.plugin.getTradeInventoryService().open(targetPlayer, category);
             return true;
         }
 
@@ -139,7 +139,7 @@ public class ShopCommand extends Command {
         final Player player = (Player) sender;
 
         LOGGER.debug("onCommand() Opening shop for player={}", player.getName());
-        this.plugin.getMainInventoryBuilder().open(player);
+        this.plugin.getShopInventoryService().openShop(player);
         return true;
     }
 }

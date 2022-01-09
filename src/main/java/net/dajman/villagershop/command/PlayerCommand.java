@@ -2,7 +2,7 @@ package net.dajman.villagershop.command;
 
 import net.dajman.villagershop.Main;
 import net.dajman.villagershop.util.Messages;
-import net.dajman.villagershop.util.logging.Logger;
+import net.dajman.villagershop.common.logging.Logger;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 

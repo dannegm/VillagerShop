@@ -6,7 +6,7 @@
 
     <groupId>net.dajman</groupId>
     <artifactId>VillagerShop</artifactId>
-    <version>1.0</version>
+    <version>1.5</version>
     <repositories>
         <repository>
             <id>spigot-repo</id>

@@ -1,9 +1,11 @@
 package net.dajman.villagershop.inventory.listeners;
 
 import net.dajman.villagershop.Main;
-import net.dajman.villagershop.category.Category;
-import net.dajman.villagershop.util.Messages;
-import net.dajman.villagershop.util.logging.Logger;
+import net.dajman.villagershop.data.category.Category;
+import net.dajman.villagershop.common.Pair;
+import net.dajman.villagershop.common.logging.Logger;
+import net.dajman.villagershop.inventory.listeners.actionservice.config.ConfigInventoryActionService;
+import net.dajman.villagershop.inventory.listeners.actionservice.shop.ShopInventoryActionService;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,9 +18,14 @@ public class InventoryClickListener implements Listener {
     private final Logger LOGGER = Logger.getLogger(InventoryClickListener.class);
 
     private final Main plugin;
+    private final ShopInventoryActionService shopInventoryActionService;
+    private final ConfigInventoryActionService configInventoryActionService;
 
-    public InventoryClickListener(Main plugin) {
+    public InventoryClickListener(Main plugin, ShopInventoryActionService shopInventoryActionService,
+                                  ConfigInventoryActionService configInventoryActionService) {
         this.plugin = plugin;
+        this.shopInventoryActionService = shopInventoryActionService;
+        this.configInventoryActionService = configInventoryActionService;
     }
 
     @EventHandler
@@ -34,43 +41,34 @@ public class InventoryClickListener implements Listener {
 
         final Player player = (Player) e.getWhoClicked();
 
+        if (e.getView().getTitle().equals(this.plugin.getConfiguration().guiName)){
+
+            e.setCancelled(true);
+
+            LOGGER.debug("onClick() title={} is equal to configGuiName={}, event is cancelled, " +
+                    "looking for category by slot", e.getView().getTitle(), this.plugin.getConfiguration().guiName);
 
 
-        if (!e.getView().getTitle().equals(this.plugin.getConfiguration().guiName)){
-
-            LOGGER.debug("onClick() title={} is not equals to configGuiName={}", e.getView().getTitle(),
-                    this.plugin.getConfiguration().guiName);
-            return;
-        }
-
-        e.setCancelled(true);
-
-        LOGGER.debug("onClick() event is cancelled, looking for category by slot");
-
-        final Optional<Category> optionalCategory = this.plugin.getCategories().getBySlot(e.getRawSlot());
-
-        if (!optionalCategory.isPresent()){
-
-            LOGGER.debug("onClick() category for slot={} not found", Integer.toString(e.getRawSlot()));
-            return;
-        }
-
-        final Category category = optionalCategory.get();
-
-        LOGGER.debug("onClick() Category={} found for slot={}", category.getName(), Integer.toString(e.getRawSlot()));
-
-        if (!player.hasPermission(category.getPermission())){
-
-            LOGGER.debug("onClick() Player={} do not have permission={} for open category={}",
-                    player.getName(), category.getPermission(), category.getName());
-
-            Messages.sendMessageIfNotEmpty(player, this.plugin.getConfiguration().categoryPermissionMessage,
-                    "{CATEGORY}", category.getName());
+            this.shopInventoryActionService.onClickShop(player, e.getRawSlot());
 
             return;
         }
 
-        LOGGER.debug("onClick() Opening category={} for player={}", category.getName(), player.getName());
-        this.plugin.getTradeInventoryBuilder().open(player, category);
+        final Optional<Pair<Category, Integer>> optionalCategoryWithCurrentPage = this.plugin.getCategories()
+                .getCategoryAndPageByConfigInventory(e.getInventory());
+
+        if (!optionalCategoryWithCurrentPage.isPresent()){
+            LOGGER.debug("onClick() Category for open config inventory not found.");
+            return;
+        }
+
+        final Pair<Category, Integer> categoryWithCurrentPage = optionalCategoryWithCurrentPage.get();
+
+        final Category category = categoryWithCurrentPage.getKey();
+        final Integer currentPage = categoryWithCurrentPage.getValue();
+
+        final boolean cancel = this.configInventoryActionService.onClickConfig(player, category, currentPage, e.getRawSlot());
+
+        e.setCancelled(cancel);
     }
 }
