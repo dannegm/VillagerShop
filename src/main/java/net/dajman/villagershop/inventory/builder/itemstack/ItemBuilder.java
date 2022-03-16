@@ -16,7 +16,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 
-public class ItemBuilder implements Builder<ItemStack> {
+public class ItemBuilder implements Builder<ItemStack>, Cloneable {
 
     private static final Logger LOGGER = Logger.getLogger(ItemBuilder.class);
 
@@ -190,6 +190,18 @@ public class ItemBuilder implements Builder<ItemStack> {
         return itemStack;
     }
 
+    @Override
+    public ItemBuilder clone() {
+        try{
+            return (ItemBuilder) super.clone();
+        }
+        catch (final CloneNotSupportedException e){
+            return new ItemBuilder(this.material, this.amount, this.damage)
+                    .setCustomModelData(this.customModelData)
+                    .setName(this.name)
+                    .setLore(this.lore);
+        }
+    }
 
     private static Material getMaterialFromString(String mat){
         return  Optional.ofNullable(Material.getMaterial(mat.toUpperCase())).orElse(Material.AIR);

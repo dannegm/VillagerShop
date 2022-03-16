@@ -8,7 +8,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Objects;
 
 public class ConfigInventoryBuilder implements Builder<Inventory> {
 

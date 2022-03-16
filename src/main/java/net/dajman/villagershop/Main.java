@@ -5,6 +5,7 @@ import net.dajman.villagershop.command.manager.CommandManager;
 import net.dajman.villagershop.data.configuration.Config;
 import net.dajman.villagershop.data.category.CategoryList;
 import net.dajman.villagershop.data.service.CategoryDataService;
+import net.dajman.villagershop.hook.placeholder.PlaceholderHook;
 import net.dajman.villagershop.inventory.listeners.actionservice.config.ConfigInventoryActionService;
 import net.dajman.villagershop.inventory.listeners.actionservice.shop.ShopInventoryActionService;
 import net.dajman.villagershop.inventory.service.config.ConfigInventoryService;
@@ -32,8 +33,8 @@ public class Main extends JavaPlugin{
     private TradeInventoryService tradeInventoryService;
     private ConfigInventoryService configInventoryService;
     private CommandManager commandManager;
-
     private ItemStackSerializer itemStackSerializer;
+    private PlaceholderHook placeholderHook;
 
 
     public Config getConfiguration() {
@@ -68,6 +69,10 @@ public class Main extends JavaPlugin{
         return itemStackSerializer;
     }
 
+    public PlaceholderHook getPlaceholderHook() {
+        return placeholderHook;
+    }
+
     @Override
     public void onEnable() {
         Logger.init(this);
@@ -92,7 +97,6 @@ public class Main extends JavaPlugin{
         Bukkit.getPluginManager().registerEvents(new InventoryClickListener(
                 this, shopInventoryActionService, configInventoryActionService), this);
 
-
         LOGGER.info("Plugin enabled.");
     }
 
@@ -111,6 +115,4 @@ public class Main extends JavaPlugin{
         LOGGER.info("Plugin disabled.");
 
     }
-
-
 }

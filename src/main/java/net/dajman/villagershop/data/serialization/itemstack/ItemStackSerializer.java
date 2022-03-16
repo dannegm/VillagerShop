@@ -2,12 +2,15 @@ package net.dajman.villagershop.data.serialization.itemstack;
 
 import net.dajman.villagershop.common.logging.Logger;
 import net.dajman.villagershop.common.Serializer;
+import net.dajman.villagershop.data.serialization.itemstack.meta.ItemMetaSerializer;
 import net.dajman.villagershop.data.serialization.itemstack.meta.potion.PotionMetaSerializer;
+import net.dajman.villagershop.data.serialization.itemstack.meta.skull.SkullMetaSerializer;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import java.io.*;
 import java.util.*;
@@ -21,10 +24,10 @@ public class ItemStackSerializer implements Serializer<ItemStack[], String> {
 
     private static final String ITEM_META_KEY = "meta";
 
-    private final PotionMetaSerializer potionMetaSerializer;
+    private final ItemMetaSerializer itemMetaSerializer;
 
     public ItemStackSerializer(){
-        this.potionMetaSerializer = new PotionMetaSerializer();
+        this.itemMetaSerializer = new ItemMetaSerializer();
     }
 
     @Override
@@ -41,16 +44,9 @@ public class ItemStackSerializer implements Serializer<ItemStack[], String> {
 
                     if (itemStack.hasItemMeta()){
 
-                        ItemMeta itemMeta = itemStack.getItemMeta();
+                        final ItemMeta itemMeta = itemStack.getItemMeta();
 
-                        Optional<Map<String, Object>> serializedItemMeta;
-
-                        if (itemMeta instanceof PotionMeta){
-                            serializedItemMeta = this.potionMetaSerializer.serialize((PotionMeta) itemMeta);
-                        } else {
-                            serializedItemMeta = Optional.of(new HashMap<>(itemMeta.serialize()));
-                        }
-
+                        Optional<Map<String, Object>> serializedItemMeta = this.itemMetaSerializer.serialize(itemMeta);
 
                         // validate serialized meta
                         if (serializedItemMeta.isPresent()){
@@ -133,12 +129,7 @@ public class ItemStackSerializer implements Serializer<ItemStack[], String> {
                     final Map<String, Object> serializedMeta = new HashMap<>((Map<String, Object>) serializedItem.remove("meta"));
                     serializedMeta.put("==", "ItemMeta");
 
-                    if ("POTION".equals(serializedMeta.get("meta-type"))){
-                        deserializedItemMeta = Optional.ofNullable(this.potionMetaSerializer.deserialize(serializedMeta)
-                                .orElse(null));
-                    } else {
-                        deserializedItemMeta = Optional.ofNullable((ItemMeta) ConfigurationSerialization.deserializeObject(serializedMeta));
-                    }
+                    deserializedItemMeta = this.itemMetaSerializer.deserialize(serializedMeta);
                 }
 
                 final ItemStack deserializedItem = ItemStack.deserialize(serializedItem);

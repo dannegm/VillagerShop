@@ -23,7 +23,7 @@ public class ShopInventoryService {
         final Config config = this.plugin.getConfiguration();
 
         final Inventory shopInventory = new ShopInventoryBuilder(config.guiName, config.guiRows,
-                this.plugin.getCategories(), config.fillItem)
+                this.plugin.getCategories(), config.fillItem, player)
                 .build();
 
         if (isNull(shopInventory)){

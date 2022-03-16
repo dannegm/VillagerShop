@@ -2,11 +2,14 @@ package net.dajman.villagershop.inventory.builder.inventory;
 
 import net.dajman.villagershop.data.category.Category;
 import net.dajman.villagershop.data.category.CategoryList;
+import net.dajman.villagershop.hook.placeholder.PlaceholderHook;
 import net.dajman.villagershop.inventory.builder.itemstack.ItemBuilder;
 import net.dajman.villagershop.common.Builder;
 import net.dajman.villagershop.common.logging.Logger;
+import net.dajman.villagershop.inventory.common.Strings;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -15,6 +18,7 @@ import java.util.Objects;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static net.dajman.villagershop.inventory.common.Strings.SHOP_INVENTORY_SUFFIX;
 
 public class ShopInventoryBuilder implements Builder<Inventory> {
 
@@ -24,13 +28,15 @@ public class ShopInventoryBuilder implements Builder<Inventory> {
     private final int guiRows;
     private final CategoryList categories;
     private final ItemBuilder fillItem;
+    private final OfflinePlayer offlinePlayer;
 
     public ShopInventoryBuilder(final String guiName, final int guiRows, final CategoryList categories,
-                                final ItemBuilder fillItem){
+                                final ItemBuilder fillItem, final OfflinePlayer offlinePlayer){
         this.guiName = guiName;
         this.guiRows = guiRows;
         this.categories = categories;
         this.fillItem = fillItem;
+        this.offlinePlayer = offlinePlayer;
     }
 
     public void open(final Player player){
@@ -60,14 +66,24 @@ public class ShopInventoryBuilder implements Builder<Inventory> {
             return null;
         }
 
-        final Inventory inventory = Bukkit.createInventory(null, this.guiRows *  9,
-                this.guiName);
+        final String guiName = PlaceholderHook.setAllPlaceholders(this.offlinePlayer, this.guiName) + SHOP_INVENTORY_SUFFIX();
+
+        final Inventory inventory = Bukkit.createInventory(null, this.guiRows *  9, guiName);
 
         for (Category category : this.categories) {
-            inventory.setItem(category.getSlot(), category.getItem().build());
+
+            final ItemBuilder categoryItem = category.getItem().clone();
+            categoryItem.setName(PlaceholderHook.setAllPlaceholders(this.offlinePlayer, categoryItem.getName()));
+            categoryItem.setLore(PlaceholderHook.setAllPlaceholders(this.offlinePlayer, categoryItem.getLore()));
+
+            inventory.setItem(category.getSlot(), categoryItem.build());
         }
 
-        final ItemStack fillItemStack = this.fillItem.build();
+        final ItemBuilder fillItem = this.fillItem.clone();
+        fillItem.setName(PlaceholderHook.setAllPlaceholders(this.offlinePlayer, fillItem.getName()));
+        fillItem.setLore(PlaceholderHook.setAllPlaceholders(this.offlinePlayer, fillItem.getLore()));
+
+        final ItemStack fillItemStack = fillItem.build();
 
         if (isNull(fillItemStack) || Objects.equals(fillItemStack.getType(), Material.AIR)){
             return inventory;

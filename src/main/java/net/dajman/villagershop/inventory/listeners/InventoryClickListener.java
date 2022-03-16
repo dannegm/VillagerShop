@@ -4,6 +4,7 @@ import net.dajman.villagershop.Main;
 import net.dajman.villagershop.data.category.Category;
 import net.dajman.villagershop.common.Pair;
 import net.dajman.villagershop.common.logging.Logger;
+import net.dajman.villagershop.inventory.common.Strings;
 import net.dajman.villagershop.inventory.listeners.actionservice.config.ConfigInventoryActionService;
 import net.dajman.villagershop.inventory.listeners.actionservice.shop.ShopInventoryActionService;
 import org.bukkit.entity.Player;
@@ -12,6 +13,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.util.Optional;
+
+import static net.dajman.villagershop.inventory.common.Strings.SHOP_INVENTORY_SUFFIX;
 
 public class InventoryClickListener implements Listener {
 
@@ -41,7 +44,7 @@ public class InventoryClickListener implements Listener {
 
         final Player player = (Player) e.getWhoClicked();
 
-        if (e.getView().getTitle().equals(this.plugin.getConfiguration().guiName)){
+        if (e.getView().getTitle().endsWith(SHOP_INVENTORY_SUFFIX())){
 
             e.setCancelled(true);
 

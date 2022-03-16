@@ -1,6 +1,7 @@
 package net.dajman.villagershop.inventory.service.trade;
 
 import net.dajman.villagershop.data.category.Category;
+import net.dajman.villagershop.hook.placeholder.PlaceholderHook;
 import net.dajman.villagershop.util.Reflection;
 import net.dajman.villagershop.common.logging.Logger;
 import org.bukkit.Material;
@@ -139,8 +140,9 @@ public class TradeInventoryService {
 
     public void open(Player player, Category category){
         try {
+            final String categoryNameWithPlaceholders = PlaceholderHook.setAllPlaceholders(player, category.getName());
             final Object entityVillager = this.createEntityVillager(player.getWorld());
-            this.setCustomName(entityVillager, category.getName());
+            this.setCustomName(entityVillager, categoryNameWithPlaceholders);
             recipeListField.set(entityVillager, this.getRecipes(category.getConfigInventories()));
             this.openTrade(this.getHandleCraftPlayer.invoke(this.craftPlayer.cast(player)), entityVillager);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
