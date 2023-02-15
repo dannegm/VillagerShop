@@ -1,0 +1,10 @@
+name: VillagerShop
+version: 1.6
+api-version: 1.13
+main: net.dajman.villagershop.Main
+softdepend: [PlaceholderAPI]
+permissions:
+  villagershop.admin:
+    children:
+    - villagershop.cmd.*
+    - villagershop.category.*

@@ -1,0 +1,104 @@
+# configuration version, do not change this value,
+# it is used to verify that the file is appropriate for the plugin version
+config-version: 1.1
+# debug messages in logs
+# it is for plugin testing and locating bugs
+# recommended disabled because of spam in logs
+debug: false
+
+# Main gui
+gui-properties:
+  # Title
+  name: '&2&lShop'
+  # Size
+  rows: 3
+
+# An item that fills the blanks in gui
+fill-item:
+  # material / id (id only in older versions)
+  material: AIR
+  # name of the item
+  name: ''
+  # lore of the item (empty in this case)
+  lore: []
+
+# after changing the commands it is recommended to restart or reload the server
+command:
+  shop:
+    label: 'shop'
+    aliases:
+      - 'openshop'
+  open:
+    label: 'open'
+    aliases: []
+  edit:
+    label: 'edit'
+    aliases: []
+  reload:
+    label: 'reload'
+    aliases: []
+
+message:
+  # message when player don't use command correctly
+  # available variables: {USAGE}
+  command-usage: '&cCorrect usage: &7{USAGE}'
+  # message when player don't have permission to use command
+  # leave blank if you don't want the message
+  command-permission: "&cYou don't have permission to use this command"
+  # message when player don't have permission to open category
+  # leave blank if you don't want the message
+  # available variables: {CATEGORY}
+  category-permission: "&cYou don't have permission to open category &7{CATEGORY}"
+  # message when the player which we want to open category do not have permission to open this category
+  # leave blank if you don't want the message
+  # available variables: {CATEGORY}, {PLAYER}
+  category-others-permission: "&cPlayer &7{PLAYER} &cdon't have permission to open category &7{CATEGORY}"
+  # message when the player which we want to open shop do not have permission to this
+  # leave blank if you don't want the message
+  # available variables: {PLAYER}
+  shop-open-others-permission: "&cPlayer &7{PLAYER} &cdon't have permission to open shop"
+  # message when sender enter the wrong category name in command
+  # available variables: {GIVEN_CATEGORY}
+  category-not-found: '&cCategory {GIVEN_CATEGORY} not found'
+  # message when sender enter the wrong player name in command
+  player-not-found: '&cPlayer {GIVEN_PLAYER_NAME} not found'
+
+# Available categories in the shop
+categories:
+  # example category
+  blocks:
+    # category name
+    name: blocks
+    # item of category in main gui
+    item:
+      # slot in main gui
+      slot: 12
+      # material / id (id only in older versions)
+      material: STONE
+      # name of the item
+      name: '&2&lBlocks'
+      # lore of the item
+      lore:
+        - '&7Click to open.'
+      # ability to add custom model data, working only on servers >= 1.13
+      # if you want add this, just remove comment prefix (#) below
+      #custom-model-data: 1234
+  # other categories
+  # all same as above
+  tools:
+    name: tools
+    item:
+      slot: 13
+      material: IRON_PICKAXE
+      name: '&2&lTools'
+      lore:
+        - '&7Click to open.'
+  resources:
+    name: resources
+    item:
+      slot: 14
+      material: DIAMOND
+      name: '&2&lResources'
+      lore:
+        - '&7Click to open.'
+

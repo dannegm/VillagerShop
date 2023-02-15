@@ -79,6 +79,9 @@ public class TradeInventoryService {
                 this.setTradingPlayer = this.entityVillager.getDeclaredMethod(this.version >= 1180 ? "f" : "setTradingPlayer", this.entityHuman);
                 this.setCustomName = this.entityVillager.getMethod(this.version >= 1180 ? "a": "setCustomName", this.iChatBaseComponent);
 
+                if (this.version >= 1192) {
+                    this.entityTypesVillager = Reflection.getFieldVal(this.entityTypes, "ba");
+                }
             } else {
 
                 this.entityVillager = Reflection.getNmsClass("EntityVillager");
